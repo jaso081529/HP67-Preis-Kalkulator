@@ -4,10 +4,22 @@ const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': 
 const money = v => v === null || v === undefined ? 'Offen' : new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(v);
 const date = () => new Date().toLocaleDateString('sv-SE');
 const uid = () => crypto.randomUUID();
-let state, token, view = 'overview', query = '', category = '', selectedQuote = null, selectedInvoice = null, selectedPlannerDate = '', plannerMonth = new Date(new Date().getFullYear(),new Date().getMonth(),1);
+let state, token, view = 'overview', query = '', category = '', selectedQuote = null, selectedInvoice = null, selectedPlannerDate = '', plannerMonth = new Date(new Date().getFullYear(),new Date().getMonth(),1), printPayload = null;
 const dialog = $('#dialog');
 const navs = [['overview','◫','Übersicht'],['planner','▣','Kalender & Planer'],['products','▦','Produkte & Preise'],['textiles','▦','Textilien & Zubehör'],['stickers','▧','Aufkleber-Preisliste'],['calculator','＋','Kalkulator'],['customers','♧','Kunden'],['quotes','▤','Angebote'],['invoices','▥','Rechnungen'],['catalog','◉','Kundenansicht'],['settings','⚙','Einstellungen']];
 function toast(text) { const el = $('#toast'); el.textContent = text; el.style.display = 'block'; clearTimeout(toast.timer); toast.timer = setTimeout(() => el.style.display = 'none', 4500); }
+function openPrintView(title = 'HooDPlaka67 Druckansicht') {
+ const source = $('#content');
+ if (!source) throw Error('Für diese Ansicht sind keine Druckdaten vorhanden.');
+ const printable = source.cloneNode(true);
+ printable.querySelectorAll('.no-print, dialog, button').forEach(node => node.remove());
+ const safeTitle = esc(title);
+ printPayload = {title, html:`<!doctype html><html lang="de"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${safeTitle}</title><link rel="stylesheet" href="${location.origin}/style.css"></head><body><main class="main">${printable.innerHTML}</main></body></html>`};
+ dialog.className='print-dialog';
+ dialog.innerHTML=`<div class="dialog-head no-print"><div><h2>${safeTitle}</h2><p class="muted">Vorschau ohne interne Bedienelemente</p></div><button class="close" type="button" data-action="close" aria-label="Schließen">×</button></div><div class="actions no-print print-actions"><button class="button primary" type="button" data-action="confirm-print">Jetzt drucken / als PDF speichern</button><button class="button" type="button" data-action="download-print">Druckdatei herunterladen</button></div><div class="print-preview">${printable.innerHTML}</div>`;
+ dialog.showModal();
+}
+function downloadPrintFile(){if(!printPayload)throw Error('Keine Druckansicht vorbereitet.');const blob=new Blob([printPayload.html],{type:'text/html;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`${printPayload.title.replace(/[^a-z0-9_-]/gi,'-')}.html`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);toast('Druckdatei gespeichert. Öffne sie im Browser und wähle Drucken oder Als PDF speichern.');}
 async function persist(next) { const response = await fetch('/api/state', { method: 'PUT', headers: { 'Content-Type': 'application/json', 'X-HP67-Token': token }, body: JSON.stringify(next) }); const result = await response.json(); if (!response.ok) throw Error(result.error); state = result.state; }
 const button = (text, action, id = '', cls = '') => `<button type="button" class="button ${cls}" data-action="${action}" data-id="${esc(id)}">${text}</button>`;
 const head = (title, subtitle, action = '') => `<div class="page-head"><div><h1>${title}</h1><p class="muted">${subtitle}</p></div><div class="actions no-print">${action}</div></div>`;
@@ -160,11 +172,13 @@ document.addEventListener('click',async e=>{const nav=e.target.closest('[data-na
  else if(action==='planner-prev'||action==='planner-next'){plannerMonth=new Date(plannerMonth.getFullYear(),plannerMonth.getMonth()+(action==='planner-next'?1:-1),1);renderContent();}
  else if(action==='planner-today'){const now=new Date();selectedPlannerDate=localDate(now);plannerMonth=new Date(now.getFullYear(),now.getMonth(),1);renderContent();}
  else if(action==='toggle-planner'){const next=structuredClone(state),item=(next.plannerItems||[]).find(i=>i.id===id);if(!item)throw Error('Eintrag nicht gefunden.');item.status=item.status==='Erledigt'?'Offen':'Erledigt';await persist(next);renderContent();toast(item.status==='Erledigt'?'Erledigt – gut gemacht.':'Eintrag wieder geöffnet.');}
- else if(action==='close')dialog.close();
+ else if(action==='close'){dialog.close();dialog.className='';}
  else if(action==='view-quote'){selectedQuote=id;view='quote';shell();}
  else if(action==='view-invoice'){selectedInvoice=id;view='invoice';shell();}
- else if(action==='print'){if(view==='quote'&&state.quotes.find(q=>q.id===selectedQuote)?.taxRate===null)throw Error('Bitte zuerst die Umsatzsteuer im Angebot ergänzen.');window.print();}
- else if(action==='print-invoice'){const invoice=(state.invoices||[]).find(i=>i.id===id);const problems=invoiceProblems(invoice);if(problems.length)throw Error(`Vor dem Drucken fehlen: ${problems.join(', ')}.`);window.print();}
+ else if(action==='print'){if(view==='quote'&&state.quotes.find(q=>q.id===selectedQuote)?.taxRate===null)throw Error('Bitte zuerst die Umsatzsteuer im Angebot ergänzen.');openPrintView(view==='quote'?'Angebot':view==='stickers'?'Aufkleber-Preisliste':view==='textiles'?'Textilien-Preisliste':'HooDPlaka67 Preisliste');}
+ else if(action==='print-invoice'){const invoice=(state.invoices||[]).find(i=>i.id===id);const problems=invoiceProblems(invoice);if(problems.length)throw Error(`Vor dem Drucken fehlen: ${problems.join(', ')}.`);openPrintView(`Rechnung ${invoice.number}`);}
+ else if(action==='confirm-print'){document.body.classList.add('printing');window.addEventListener('afterprint',()=>document.body.classList.remove('printing'),{once:true});window.print();setTimeout(()=>document.body.classList.remove('printing'),1500);}
+ else if(action==='download-print')downloadPrintFile();
  else if(action==='invoice-image'){const invoice=(state.invoices||[]).find(i=>i.id===id);if(!invoice||invoice.type!=='Einfach')throw Error('Einfache interne Rechnung nicht gefunden.');downloadSimpleInvoiceImage(invoice);}
  else if(action==='add-item')$('#quote-items').insertAdjacentHTML('beforeend',quoteRow());
  else if(action==='add-invoice-item')$('#invoice-items').insertAdjacentHTML('beforeend',quoteRow());
