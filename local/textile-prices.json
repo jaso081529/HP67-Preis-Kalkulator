@@ -1,0 +1,628 @@
+{
+  "id": "textiles-excel-2026-09-06",
+  "sourceFile": "HP67 Textilien preise  etc.xlsx",
+  "sheet": "Tabelle1",
+  "priceType": "vk-net",
+  "note": "Zusätzliche Motive sind Aufpreise auf die gewählte Grundausführung.",
+  "additionalMotifSurcharges": [
+    {
+      "id": "none",
+      "label": "Kein weiteres Motiv",
+      "price": 0
+    },
+    {
+      "id": "small",
+      "label": "Weiteres Motiv · klein",
+      "price": 3.5
+    },
+    {
+      "id": "large",
+      "label": "Weiteres Motiv · groß",
+      "price": 4.5
+    }
+  ],
+  "entries": [
+    {
+      "id": "textile-row-3",
+      "name": "T-Shirt B&C E190 Rot",
+      "sourceRow": 3,
+      "options": [
+        {
+          "label": "Normalfarbe · einseitig",
+          "price": 17.0,
+          "sourceText": "17,00",
+          "sourceCell": "Excel C3:C5",
+          "review": false
+        },
+        {
+          "label": "Normalfarbe · beidseitig",
+          "price": 24.9,
+          "sourceText": "24,90",
+          "sourceCell": "Excel D3:D5",
+          "review": false
+        },
+        {
+          "label": "Gold / Metallic · einseitig",
+          "price": 19.99,
+          "sourceText": "19,99",
+          "sourceCell": "Nutzerangabe 06.09.2026",
+          "review": false
+        },
+        {
+          "label": "Gold / Metallic · beidseitig",
+          "price": 27.89,
+          "sourceText": "19,99 + 7,90",
+          "sourceCell": "Berechnet 06.09.2026",
+          "review": false
+        },
+        {
+          "label": "Glow-in-the-Dark · einseitig",
+          "price": 21.9,
+          "sourceText": "21,90",
+          "sourceCell": "Nutzerangabe 06.09.2026",
+          "review": false
+        },
+        {
+          "label": "Glow-in-the-Dark · beidseitig",
+          "price": 29.8,
+          "sourceText": "21,90 + 7,90",
+          "sourceCell": "Berechnet 06.09.2026",
+          "review": false
+        }
+      ]
+    },
+    {
+      "id": "textile-row-4",
+      "name": "T-Shirt B&C E190 Weiß",
+      "sourceRow": 4,
+      "options": [
+        {
+          "label": "Normalfarbe · einseitig",
+          "price": 17.0,
+          "sourceText": "17,00",
+          "sourceCell": "Excel C3:C5",
+          "review": false
+        },
+        {
+          "label": "Normalfarbe · beidseitig",
+          "price": 24.9,
+          "sourceText": "24,90",
+          "sourceCell": "Excel D3:D5",
+          "review": false
+        },
+        {
+          "label": "Gold / Metallic · einseitig",
+          "price": 19.99,
+          "sourceText": "19,99",
+          "sourceCell": "Nutzerangabe 06.09.2026",
+          "review": false
+        },
+        {
+          "label": "Gold / Metallic · beidseitig",
+          "price": 27.89,
+          "sourceText": "19,99 + 7,90",
+          "sourceCell": "Berechnet 06.09.2026",
+          "review": false
+        },
+        {
+          "label": "Glow-in-the-Dark · einseitig",
+          "price": 21.9,
+          "sourceText": "21,90",
+          "sourceCell": "Nutzerangabe 06.09.2026",
+          "review": false
+        },
+        {
+          "label": "Glow-in-the-Dark · beidseitig",
+          "price": 29.8,
+          "sourceText": "21,90 + 7,90",
+          "sourceCell": "Berechnet 06.09.2026",
+          "review": false
+        }
+      ]
+    },
+    {
+      "id": "textile-row-5",
+      "name": "T-Shirt B&C E190 Schwarz",
+      "sourceRow": 5,
+      "options": [
+        {
+          "label": "Normalfarbe · einseitig",
+          "price": 17.0,
+          "sourceText": "17,00",
+          "sourceCell": "Excel C3:C5",
+          "review": false
+        },
+        {
+          "label": "Normalfarbe · beidseitig",
+          "price": 24.9,
+          "sourceText": "24,90",
+          "sourceCell": "Excel D3:D5",
+          "review": false
+        },
+        {
+          "label": "Gold / Metallic · einseitig",
+          "price": 19.99,
+          "sourceText": "19,99",
+          "sourceCell": "Nutzerangabe 06.09.2026",
+          "review": false
+        },
+        {
+          "label": "Gold / Metallic · beidseitig",
+          "price": 27.89,
+          "sourceText": "19,99 + 7,90",
+          "sourceCell": "Berechnet 06.09.2026",
+          "review": false
+        },
+        {
+          "label": "Glow-in-the-Dark · einseitig",
+          "price": 21.9,
+          "sourceText": "21,90",
+          "sourceCell": "Nutzerangabe 06.09.2026",
+          "review": false
+        },
+        {
+          "label": "Glow-in-the-Dark · beidseitig",
+          "price": 29.8,
+          "sourceText": "21,90 + 7,90",
+          "sourceCell": "Berechnet 06.09.2026",
+          "review": false
+        }
+      ]
+    },
+    {
+      "id": "textile-row-7",
+      "name": "Hoodies Russell Athletics Schwarz",
+      "sourceRow": 7,
+      "options": [
+        {
+          "label": "Einseitig bedruckt (Vorne oder hinten)",
+          "price": 45.0,
+          "sourceText": "45",
+          "sourceCell": "C7",
+          "review": false
+        },
+        {
+          "label": "Beidseitig bedruckt",
+          "price": 50.0,
+          "sourceText": "50",
+          "sourceCell": "D7",
+          "review": false
+        }
+      ]
+    },
+    {
+      "id": "textile-row-9",
+      "name": "Premium Windbreaker Eisweiß",
+      "sourceRow": 9,
+      "options": [
+        {
+          "label": "Einseitig bedruckt (Vorne oder hinten)",
+          "price": 45.0,
+          "sourceText": "45",
+          "sourceCell": "C9",
+          "review": false
+        },
+        {
+          "label": "Beidseitig bedruckt",
+          "price": 50.0,
+          "sourceText": "50",
+          "sourceCell": "D9",
+          "review": false
+        }
+      ]
+    },
+    {
+      "id": "textile-row-10",
+      "name": "Premium Windbreaker Schwarz",
+      "sourceRow": 10,
+      "options": [
+        {
+          "label": "Einseitig bedruckt (Vorne oder hinten)",
+          "price": 45.0,
+          "sourceText": "45",
+          "sourceCell": "C10",
+          "review": false
+        },
+        {
+          "label": "Beidseitig bedruckt",
+          "price": 50.0,
+          "sourceText": "50",
+          "sourceCell": "D10",
+          "review": false
+        }
+      ]
+    },
+    {
+      "id": "textile-row-12",
+      "name": "Premium Windbreaker light Rot",
+      "sourceRow": 12,
+      "options": [
+        {
+          "label": "Einseitig bedruckt (Vorne oder hinten)",
+          "price": 22.99,
+          "sourceText": "22.99",
+          "sourceCell": "C12",
+          "review": false
+        },
+        {
+          "label": "Beidseitig bedruckt",
+          "price": 27.99,
+          "sourceText": "27.99",
+          "sourceCell": "D12",
+          "review": false
+        }
+      ]
+    },
+    {
+      "id": "textile-row-13",
+      "name": "Premium Windbreaker light Weiß",
+      "sourceRow": 13,
+      "options": [
+        {
+          "label": "Einseitig bedruckt (Vorne oder hinten)",
+          "price": 22.99,
+          "sourceText": "22.99",
+          "sourceCell": "C13",
+          "review": false
+        },
+        {
+          "label": "Beidseitig bedruckt",
+          "price": 27.99,
+          "sourceText": "27.99",
+          "sourceCell": "D13",
+          "review": false
+        }
+      ]
+    },
+    {
+      "id": "textile-row-14",
+      "name": "Premium Windbreaker light Schwarz",
+      "sourceRow": 14,
+      "options": [
+        {
+          "label": "Einseitig bedruckt (Vorne oder hinten)",
+          "price": 22.99,
+          "sourceText": "22.99",
+          "sourceCell": "C14",
+          "review": false
+        },
+        {
+          "label": "Beidseitig bedruckt",
+          "price": 27.99,
+          "sourceText": "27.99",
+          "sourceCell": "D14",
+          "review": false
+        }
+      ]
+    },
+    {
+      "id": "textile-row-17",
+      "name": "Anglerhut L/Xl Rot",
+      "sourceRow": 17,
+      "options": [
+        {
+          "label": "Ein Motiv",
+          "price": 14.99,
+          "sourceText": "14.99",
+          "sourceCell": "C17",
+          "review": false
+        }
+      ]
+    },
+    {
+      "id": "textile-row-18",
+      "name": "Anglerhut S/M Rot",
+      "sourceRow": 18,
+      "options": [
+        {
+          "label": "Ein Motiv",
+          "price": 14.99,
+          "sourceText": "14.99",
+          "sourceCell": "C18",
+          "review": false
+        }
+      ]
+    },
+    {
+      "id": "textile-row-19",
+      "name": "Anglerhut L/XL Weiß",
+      "sourceRow": 19,
+      "options": [
+        {
+          "label": "Ein Motiv",
+          "price": 14.99,
+          "sourceText": "14.99",
+          "sourceCell": "C19",
+          "review": false
+        }
+      ]
+    },
+    {
+      "id": "textile-row-20",
+      "name": "Anglerhut S/M Weiß",
+      "sourceRow": 20,
+      "options": [
+        {
+          "label": "Ein Motiv",
+          "price": 14.99,
+          "sourceText": "14.99",
+          "sourceCell": "C20",
+          "review": false
+        }
+      ]
+    },
+    {
+      "id": "textile-row-21",
+      "name": "Anglerhut L/XL Schwarz",
+      "sourceRow": 21,
+      "options": [
+        {
+          "label": "Ein Motiv",
+          "price": 14.99,
+          "sourceText": "14.99",
+          "sourceCell": "C21",
+          "review": false
+        }
+      ]
+    },
+    {
+      "id": "textile-row-22",
+      "name": "Anglerhut S/M Schwarz",
+      "sourceRow": 22,
+      "options": [
+        {
+          "label": "Ein Motiv",
+          "price": 14.99,
+          "sourceText": "14.99",
+          "sourceCell": "C22",
+          "review": false
+        }
+      ]
+    },
+    {
+      "id": "textile-row-25",
+      "name": "Schlauchschal Beechfield Rot",
+      "sourceRow": 25,
+      "options": [
+        {
+          "label": "Ohne Druck",
+          "price": 5.99,
+          "sourceText": "5.99",
+          "sourceCell": "C25",
+          "review": false
+        },
+        {
+          "label": "Mit kleinem Motiv",
+          "price": 9.99,
+          "sourceText": "9,99 / 11,99",
+          "sourceCell": "D25",
+          "review": false
+        },
+        {
+          "label": "Mit großem Motiv",
+          "price": 11.99,
+          "sourceText": "9,99 / 11,99",
+          "sourceCell": "D25",
+          "review": false
+        }
+      ]
+    },
+    {
+      "id": "textile-row-26",
+      "name": "Schlauchschal Beechfield Weiß",
+      "sourceRow": 26,
+      "options": [
+        {
+          "label": "Ohne Druck",
+          "price": 5.99,
+          "sourceText": "5.99",
+          "sourceCell": "C26",
+          "review": false
+        },
+        {
+          "label": "Mit kleinem Motiv",
+          "price": 9.99,
+          "sourceText": "9,99 / 11,99",
+          "sourceCell": "D26",
+          "review": false
+        },
+        {
+          "label": "Mit großem Motiv",
+          "price": 11.99,
+          "sourceText": "9,99 / 11,99",
+          "sourceCell": "D26",
+          "review": false
+        }
+      ]
+    },
+    {
+      "id": "textile-row-27",
+      "name": "Schlauchschal Beechfield Schwarz",
+      "sourceRow": 27,
+      "options": [
+        {
+          "label": "Ohne Druck",
+          "price": 5.99,
+          "sourceText": "5.99",
+          "sourceCell": "C27",
+          "review": false
+        },
+        {
+          "label": "Mit kleinem Motiv",
+          "price": 9.99,
+          "sourceText": "9,99 / 11,99",
+          "sourceCell": "D27",
+          "review": false
+        },
+        {
+          "label": "Mit großem Motiv",
+          "price": 11.99,
+          "sourceText": "9,99 / 11,99",
+          "sourceCell": "D27",
+          "review": false
+        }
+      ]
+    },
+    {
+      "id": "textile-row-31",
+      "name": "Schlauchschal Dick mit Kordel Rot",
+      "sourceRow": 31,
+      "options": [
+        {
+          "label": "Ohne Druck",
+          "price": 9.99,
+          "sourceText": "9.99",
+          "sourceCell": "C31",
+          "review": false
+        },
+        {
+          "label": "Mit großem/kleinen Motiv",
+          "price": 14.99,
+          "sourceText": "14.99",
+          "sourceCell": "D31",
+          "review": false
+        }
+      ]
+    },
+    {
+      "id": "textile-row-32",
+      "name": "Schlauchschal Dick mit Kordel Weiß",
+      "sourceRow": 32,
+      "options": [
+        {
+          "label": "Ohne Druck",
+          "price": 9.99,
+          "sourceText": "9.99",
+          "sourceCell": "C32",
+          "review": false
+        },
+        {
+          "label": "Mit großem/kleinen Motiv",
+          "price": 14.99,
+          "sourceText": "14.99",
+          "sourceCell": "D32",
+          "review": false
+        }
+      ]
+    },
+    {
+      "id": "textile-row-33",
+      "name": "Schlauchschal Dick mit Kordel Schwarz",
+      "sourceRow": 33,
+      "options": [
+        {
+          "label": "Ohne Druck",
+          "price": 9.99,
+          "sourceText": "9.99",
+          "sourceCell": "C33",
+          "review": false
+        },
+        {
+          "label": "Mit großem/kleinen Motiv",
+          "price": 14.99,
+          "sourceText": "14.99",
+          "sourceCell": "D33",
+          "review": false
+        }
+      ]
+    },
+    {
+      "id": "textile-row-36",
+      "name": "Capies Weiß",
+      "sourceRow": 36,
+      "options": [
+        {
+          "label": "Mit Druck",
+          "price": 14.99,
+          "sourceText": "14.99",
+          "sourceCell": "C36",
+          "review": false
+        }
+      ]
+    },
+    {
+      "id": "textile-row-37",
+      "name": "Capies Schwarz",
+      "sourceRow": 37,
+      "options": [
+        {
+          "label": "Mit Druck",
+          "price": 14.99,
+          "sourceText": "14.99",
+          "sourceCell": "C37",
+          "review": false
+        }
+      ]
+    },
+    {
+      "id": "textile-row-40",
+      "name": "Balackava Beechfield Schwarz",
+      "sourceRow": 40,
+      "options": [
+        {
+          "label": "Ohne Druck",
+          "price": 6.0,
+          "sourceText": "6",
+          "sourceCell": "C40",
+          "review": false
+        },
+        {
+          "label": "Mit großem Motiv",
+          "price": 9.99,
+          "sourceText": "9,99/7,99",
+          "sourceCell": "D40",
+          "review": false
+        },
+        {
+          "label": "Mit kleinem Motiv",
+          "price": 7.99,
+          "sourceText": "9,99/7,99",
+          "sourceCell": "D40",
+          "review": false
+        }
+      ]
+    },
+    {
+      "id": "textile-row-43",
+      "name": "Wanduhr mit eigenem Design",
+      "sourceRow": 43,
+      "options": [
+        {
+          "label": "Mit eigenem Design",
+          "price": 20.0,
+          "sourceText": "20,00",
+          "sourceCell": "Nutzerangabe 06.09.2026",
+          "review": false
+        }
+      ]
+    },
+    {
+      "id": "textile-row-45",
+      "name": "Umhängrtasche Standard + Druck",
+      "sourceRow": 45,
+      "options": [
+        {
+          "label": "Mit Druck",
+          "price": 19.99,
+          "sourceText": "19.99",
+          "sourceCell": "C45",
+          "review": false
+        }
+      ]
+    },
+    {
+      "id": "textile-row-46",
+      "name": "Umhängetasche Premium mit druck",
+      "sourceRow": 46,
+      "options": [
+        {
+          "label": "Mit Druck",
+          "price": 24.99,
+          "sourceText": "24.99",
+          "sourceCell": "C46",
+          "review": false
+        }
+      ]
+    }
+  ]
+}

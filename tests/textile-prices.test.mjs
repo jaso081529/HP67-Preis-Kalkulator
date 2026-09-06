@@ -1,0 +1,33 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
+import {initialState,validateState} from '../local/core.mjs';
+const list=JSON.parse(await readFile(new URL('../local/textile-prices.json',import.meta.url),'utf8'));
+test('Excel-Import trennt Festpreise von offenen Zusatzmotiv-Angaben',()=>{
+ assert.equal(list.priceType,'vk-net');
+ assert.equal(list.entries.length,27);
+ const options=list.entries.flatMap(e=>e.options);
+ assert.equal(options.length,59);
+ assert.equal(options.filter(o=>!o.review&&o.price!==null).length,59);
+ assert.equal(options.filter(o=>o.review).length,0);
+ assert.equal(list.entries[0].options[0].price,17);
+ assert.equal(list.entries[0].options[1].price,24.9);
+ assert.equal(list.entries[0].options[2].price,19.99);
+ assert.equal(list.entries[0].options[3].price,27.89);
+ assert.equal(list.entries[0].options[4].price,21.9);
+ assert.equal(list.entries[0].options[5].price,29.8);
+ assert.deepEqual(list.additionalMotifSurcharges.map(s=>s.price),[0,3.5,4.5]);
+ const clock=list.entries.find(e=>e.sourceRow===43);
+ assert.equal(clock.options[0].price,20);
+ assert.equal(clock.options[0].sourceText,'20,00');
+ assert.doesNotThrow(()=>validateState({...initialState(),textilePriceList:list}));
+});
+test('Unterschiedliche Reihenfolge von klein und groß bleibt korrekt zugeordnet',()=>{
+ const scarf=list.entries.find(e=>e.sourceRow===25),bala=list.entries.find(e=>e.sourceRow===40);
+ assert.equal(scarf.options.find(o=>o.label==='Mit kleinem Motiv').price,9.99);
+ assert.equal(scarf.options.find(o=>o.label==='Mit großem Motiv').price,11.99);
+ assert.equal(bala.options.find(o=>o.label==='Mit kleinem Motiv').price,7.99);
+ assert.equal(bala.options.find(o=>o.label==='Mit großem Motiv').price,9.99);
+ const invalid=structuredClone(list);invalid.additionalMotifSurcharges[1].price=-1;
+ assert.throws(()=>validateState({...initialState(),textilePriceList:invalid}));
+});
