@@ -220,5 +220,3 @@ if (document.modelContext?.registerTool && state) {
   },{signal:lifecycle.signal})).catch(()=>{});
  } catch { /* Optional browser capability; ordinary controls remain available. */ }
 }
-
-
