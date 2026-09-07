@@ -1,6 +1,7 @@
 data/
 .npm-cache/
 node_modules/
+dist/
 *.log
 local/extract-textiles.py
 local/import-*.mjs
