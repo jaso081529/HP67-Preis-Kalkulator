@@ -3,6 +3,14 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "scripts": { "start": "node server.mjs", "test": "node --test tests/*.test.mjs", "build": "node --check server.mjs && node --check public/app.js && node --check local/core.mjs", "build:public": "node scripts/build-public-site.mjs" },
-  "engines": { "node": ">=22" }
+  "scripts": {
+    "start": "node server.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "build": "node --check server.mjs && node --check public/app.js && node --check local/core.mjs && node --check local/browser-storage.mjs && node --check local/price-list-image.mjs",
+    "build:public": "node scripts/build-public-site.mjs",
+    "test:browser": "node scripts/browser-check.mjs"
+  },
+  "engines": {
+    "node": ">=22"
+  }
 }

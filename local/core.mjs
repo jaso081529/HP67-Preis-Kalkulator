@@ -1,5 +1,30 @@
 export const categories = ['Textilien', 'Aufkleber', 'Veredelung', 'Sonstiges'];
 export const round = n => Math.round((n + Number.EPSILON) * 100) / 100;
+export function listPriceNet(price, priceType, taxRate) {
+  if (price === null || price === undefined) return null;
+  if (priceType === 'vk-net') return price;
+  if (priceType === 'vk-gross' && typeof taxRate === 'number') return round(price / (1 + taxRate / 100));
+  return null;
+}
+export function syncTextilePrices(state) {
+  const list = state.textilePriceList;
+  if (!list || list.priceType !== 'vk-net') return;
+  const products = new Map(state.products.map(product => [product.id, product]));
+  for (const entry of list.entries) for (const [index, option] of entry.options.entries()) {
+    const product = products.get(`${entry.id}-option-${index}`);
+    if (!product) continue;
+    const net = calculate(product, state.settings).net;
+    if (net !== option.price) { option.price = net; option.review = net === null; option.sourceText = net === null ? 'Preis offen' : String(net); }
+  }
+  for (const surcharge of list.additionalMotifSurcharges) {
+    const product = products.get(`textile-surcharge-${surcharge.id}`);
+    if (product) {
+      const net = calculate(product, state.settings).net;
+      if (net === null) throw Error('Bitte für zusätzliche Motive einen Aufpreis festlegen; 0 ist erlaubt.');
+      surcharge.price = net;
+    }
+  }
+}
 export function productsFromTextilePriceList(list) {
   const products=[];
   for(const entry of list.entries)for(const [index,option] of entry.options.entries())products.push({id:`${entry.id}-option-${index}`,name:entry.name,sku:'',category:entry.sourceRow===43?'Sonstiges':'Textilien',unit:'Stück',description:option.label,supplier:'',variant:option.label,ek:null,finishing:null,minutes:null,packaging:null,other:null,markup:null,vk:option.price,visible:false,notes:''});
@@ -20,6 +45,11 @@ export function initialState() {
 const fail = message => { throw new Error(message); };
 function str(v, label, max = 5000) { if (typeof v !== 'string' || v.length > max) fail(`${label}: ungültiger Text.`); }
 function number(v, label, max = 1e7) { if (v !== null && (typeof v !== 'number' || !Number.isFinite(v) || v < 0 || v > max)) fail(`${label}: ungültige Zahl.`); }
+function validDate(value) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const parsed = new Date(`${value}T00:00:00Z`);
+  return !Number.isNaN(parsed.getTime()) && parsed.toISOString().slice(0, 10) === value;
+}
 export function validateState(s) {
   if (!s || s.version !== 1 || !Number.isInteger(s.revision) || s.revision < 0 || !s.settings) fail('Ungültiges Sicherungsformat.');
   for (const k of ['business', 'owner', 'address', 'email', 'phone', 'offerNote', 'taxNote']) str(s.settings[k], k);
@@ -88,7 +118,7 @@ export function validateState(s) {
     for(const item of s.plannerItems){
       for(const k of ['id','title','date','time','type','priority','status','notes'])str(item[k],k);
       if(!item.id||plannerIds.has(item.id)||!item.title.trim())fail('Planereintrag ohne eindeutige ID oder Titel.');plannerIds.add(item.id);
-      if(!/^\d{4}-\d{2}-\d{2}$/.test(item.date)||Number.isNaN(Date.parse(`${item.date}T00:00:00`)))fail('Ungültiges Datum im Planer.');
+      if(!validDate(item.date))fail('Ungültiges Datum im Planer.');
       if(item.time&&!/^([01]\d|2[0-3]):[0-5]\d$/.test(item.time))fail('Ungültige Uhrzeit im Planer.');
       if(!['Aufgabe','Termin','Erinnerung'].includes(item.type)||!['Normal','Wichtig','Dringend'].includes(item.priority)||!['Offen','Erledigt'].includes(item.status))fail('Ungültige Planerauswahl.');
     }
@@ -97,6 +127,7 @@ export function validateState(s) {
   for (const q of s.quotes) {
     for (const k of ['number', 'date', 'validUntil', 'status', 'customerName', 'customerAddress', 'note', 'customerId']) str(q[k], k);
     if (!q.number.trim() || quoteNumbers.has(q.number)) fail('Angebotsnummer muss eindeutig sein.'); quoteNumbers.add(q.number);
+    if (!validDate(q.date) || (q.validUntil && (!validDate(q.validUntil) || q.validUntil < q.date))) fail('Angebotsdatum oder Gültigkeitsdatum prüfen.');
     if (!['Entwurf', 'Angeboten', 'Angenommen', 'Abgelehnt'].includes(q.status)) fail('Ungültiger Angebotsstatus.');
     number(q.taxRate, 'Umsatzsteuer', 100); number(q.discount, 'Rabatt', 100);
     if (q.discount === null || !Array.isArray(q.items) || !q.items.length || q.items.length > 500) fail('Angebotspositionen fehlen.');
@@ -105,13 +136,13 @@ export function validateState(s) {
   }
   if(s.invoices!==undefined){
     if(!Array.isArray(s.invoices)||s.invoices.length>10000)fail('Ungültige Rechnungsdaten.');
-    const invoiceNumbers=new Set();
+    const invoiceNumbers=new Set(),invoiceIds=new Set();
     for(const invoice of s.invoices){
       for(const k of ['id','type','number','issueDate','serviceDate','dueDate','status','customerId','customerName','customerAddress','note'])str(invoice[k],k);
-      if(!invoice.id||!invoice.number.trim()||invoiceNumbers.has(invoice.number))fail('Rechnungsnummer muss vorhanden und eindeutig sein.');invoiceNumbers.add(invoice.number);
+      if(!invoice.id||invoiceIds.has(invoice.id)||!invoice.number.trim()||invoiceNumbers.has(invoice.number))fail('Rechnungs-ID und Rechnungsnummer müssen vorhanden und eindeutig sein.');invoiceNumbers.add(invoice.number);invoiceIds.add(invoice.id);
       if(!['Komplett','Einfach'].includes(invoice.type)||!['Entwurf','Offen','Bezahlt','Storniert'].includes(invoice.status))fail('Ungültige Rechnungsart oder Status.');
-      for(const key of ['issueDate','serviceDate'])if(!/^\d{4}-\d{2}-\d{2}$/.test(invoice[key])||Number.isNaN(Date.parse(`${invoice[key]}T00:00:00`)))fail('Ungültiges Rechnungs- oder Leistungsdatum.');
-      if(invoice.dueDate&&(!/^\d{4}-\d{2}-\d{2}$/.test(invoice.dueDate)||Number.isNaN(Date.parse(`${invoice.dueDate}T00:00:00`))))fail('Ungültiges Zahlungsziel.');
+      for(const key of ['issueDate','serviceDate'])if(!validDate(invoice[key]))fail('Ungültiges Rechnungs- oder Leistungsdatum.');
+      if(invoice.dueDate&&(!validDate(invoice.dueDate)||invoice.dueDate<invoice.issueDate))fail('Ungültiges Zahlungsziel.');
       number(invoice.taxRate,'Umsatzsteuer',100);number(invoice.discount,'Rabatt',100);
       if(invoice.discount===null||!Array.isArray(invoice.items)||!invoice.items.length||invoice.items.length>500)fail('Rechnungspositionen fehlen.');
       for(const item of invoice.items){str(item.name,'Position');str(item.unit,'Einheit');number(item.price,'Preis');number(item.quantity,'Menge');if(!item.name.trim()||item.price===null||item.quantity===null||item.quantity<=0)fail('Rechnungsposition prüfen.');}
@@ -139,7 +170,7 @@ export function publicCatalog(s) {
     additionalMotifSurcharges:s.textilePriceList.additionalMotifSurcharges.map(x=>({id:x.id,label:x.label,price:x.price})),
     entries:s.textilePriceList.entries.map(entry=>({id:entry.id,name:entry.name,options:entry.options.filter(o=>o.price!==null).map(o=>({label:o.label,price:o.price}))}))
   } : null;
-  const stickers = s.stickerPriceList ? {
+  const stickers = s.stickerPriceList && s.stickerPriceList.priceType !== 'ek' ? {
     priceType:s.stickerPriceList.priceType,
     formats:s.stickerPriceList.formats.map(f=>({format:f.format,variants:f.variants.map(v=>({material:v.material,tiers:v.tiers.map(t=>({quantity:t.quantity,total:t.total}))}))}))
   } : null;

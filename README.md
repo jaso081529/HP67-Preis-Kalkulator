@@ -1,6 +1,6 @@
 # HooDPlaka67 Preisstudio
 
-Ein lokales Programm für Textilien, Aufkleber, Veredelungen und weitere Artikel. Version 1.0 bildet Produktpflege, Preiskalkulation, Kundenverwaltung, Angebote und Kundenausgaben ab. Die echten Preise werden schrittweise ergänzt.
+Ein lokales Programm für Textilien, Aufkleber, Veredelungen und weitere Artikel. Version 1.0 bildet Produktpflege, Preiskalkulation, Kundenverwaltung, Angebote und Kundenausgaben ab. Textilienpreise, Motivaufpreise und Aufkleber-Mengenpreise sind hinterlegt.
 
 ## Starten
 
@@ -9,7 +9,7 @@ Ein lokales Programm für Textilien, Aufkleber, Veredelungen und weitere Artikel
 ## Erste Schritte
 
 1. Unter **Einstellungen** Firmendaten, Stundensatz und den tatsächlich verwendeten Umsatzsteuersatz ergänzen. Ein leeres Steuerfeld bedeutet „offen“, 0 bedeutet „ohne Umsatzsteuer“. Ein passender Steuerhinweis kann selbst eingetragen werden.
-2. Unter **Produkte & Preise** Artikel, Varianten, Lieferanten und Kosten pflegen. Die drei Startartikel sind unbepreiste Vorlagen, keine echten Sortimentsdaten.
+2. Unter **Produkte & Preise** Artikel, Varianten, Lieferanten und Kosten pflegen. Die hinterlegten Textilien und Motivaufpreise sind bereits als Produkte vorhanden. Änderungen ihres Verkaufspreises werden in die Textilienliste übernommen.
 3. Unter **Kalkulator** ein Produkt auswählen und rechnen. Anschließend die Kalkulation ins Produkt übernehmen. Ein abweichender Stundensatz im Kalkulator dient nur zur Vorschau; dauerhaft wird er unter Einstellungen geändert.
 4. Kunden anlegen und Angebote erstellen. Positionen können aus dem Sortiment übernommen oder frei eingetragen werden. Mengen, Rabatt, Steuersatz, Gültigkeit und Status sind bearbeitbar.
 5. Angebote öffnen und über **Drucken / PDF** die Druckfunktion des Browsers verwenden. Dort „Als PDF speichern“ auswählen. Die Steuer muss vorher festgelegt sein. Prüfe Firmendaten, Inhalte und Druckvorschau vor dem Versand.
@@ -22,7 +22,7 @@ Ein lokales Programm für Textilien, Aufkleber, Veredelungen und weitere Artikel
 - Rechnungen speichern Preise, Kunden- und Absenderdaten als Momentaufnahme. Spätere Änderungen verändern bestehende Rechnungen nicht.
 - Das Modul erzeugt druckbare PDFs, keine strukturierten E-Rechnungen.
 
-Die Kundenansicht ist eine lokale Präsentations- und Druckansicht, kein geschütztes Kundenkonto. Für Kunden nur die erzeugte PDF weitergeben. Die lokale Adresse funktioniert nur auf diesem Computer. Ein öffentliches Kundenportal, Rechnungen, Lagerverwaltung und automatisierte Preislistenimporte sind noch nicht enthalten.
+Die Kundenansicht ist eine lokale Präsentations- und Druckansicht, kein geschütztes Kundenkonto. Für Kunden nur die erzeugte PDF weitergeben. Die lokale Adresse funktioniert nur auf diesem Computer. Ein geschütztes Kundenportal, Lagerverwaltung und automatisierte Preislistenimporte sind noch nicht enthalten.
 
 ## So wird gerechnet
 
@@ -53,4 +53,18 @@ Angebote speichern Positionen, Einzelpreise, Steuersatz, Kundendaten und Firmend
 
 `npm run build` prüft die JavaScript-Syntax. `npm test` prüft Preisberechnungen, Datenvalidierung, lokale API, Speicherung, Konflikte und Neustart. Die Tests verwenden eigene temporäre Daten, nicht den echten Bestand. Es gibt keinen Paketdownload und keinen separaten Kompilierungsschritt.
 
-Optional wird in unterstützenden Browsern das rein lesende WebMCP-Werkzeug `read_product_prices` registriert. Dafür stand hier kein unterstützender Prüfkontext zur Verfügung; die Registrierung ist nicht browserseitig verifiziert. Eine visuelle Browserprüfung wurde ebenfalls nicht durchgeführt.
+Optional wird in unterstützenden Browsern das rein lesende WebMCP-Werkzeug `read_product_prices` registriert. Dafür stand hier kein unterstützender Prüfkontext zur Verfügung; die Registrierung ist nicht browserseitig verifiziert. Die Kernabläufe wurden mit Chromium/Edge und WebKit automatisiert geprüft, einschließlich Ansichten mit 320, 390 und 1440 Pixel Breite. Dies ersetzt keinen Test auf einem physischen iPhone.
+
+## Online-Version und Preislistenexport
+
+Die vollständige App ist unter https://jaso081529.github.io/HP67-Preis-Kalkulator/ erreichbar. Private Eingaben bleiben im Browserspeicher dieses Geräts; sie werden nicht zu GitHub hochgeladen und nicht automatisch zwischen Geräten oder mit dem lokalen Programm synchronisiert. Zur Übertragung die private Sicherung exportieren und auf dem Zielgerät importieren.
+
+Vor einem Import bewahrt die Online-Version den vorherigen Stand im Browserspeicher auf. Unter Einstellungen lässt er sich mit **Stand vor letztem Import herunterladen** sichern und bei Bedarf wieder importieren. Es bleibt jeweils die letzte Sicherung vor einem Import erhalten. Wenn nicht genug Speicher verfügbar ist, wird der Import abgebrochen. Gleichzeitige Schreibzugriffe werden gesperrt, veraltete Fenster müssen neu geladen werden.
+
+Textilien, Aufkleber oder beide Listen lassen sich als PNG exportieren. Die Bilder enthalten Motivaufpreise, Preisbasis und Mengenhinweise. Lange Texte werden umgebrochen; bei zu großen Bildern steht Drucken / PDF zur Verfügung. Heruntergeladene Druckdateien enthalten die Gestaltung und funktionieren auch ohne Internetverbindung.
+
+Die Aufkleber-Preisart bleibt zunächst **Netto / Brutto noch ungeklärt**. Nach Klärung lässt sie sich unter Einstellungen festlegen. Nur bestätigte Verkaufspreise stehen in Angeboten und Rechnungen zur Auswahl; Bruttopreise werden mit dem Steuersatz des jeweiligen Belegs in netto umgerechnet. Einkaufs-Preislisten erscheinen nicht im öffentlichen JSON-Export. Bereits gespeicherte Belege behalten ihre Beträge.
+
+## Zusätzliche Browserprüfung
+
+Nach `npm run build:public` führt `npm run test:browser` die Kernabläufe mit einer isolierten Testdatenbasis aus. Dafür wird Playwright benötigt; `HP67_PLAYWRIGHT` kann auf eine vorhandene Installation zeigen. Standardmäßig wird der installierte Edge-Browser verwendet; mit `HP67_BROWSER=webkit` wird eine vorhandene Playwright-WebKit-Installation verwendet. Ergebnisse liegen im ignorierten Ordner `data/qa`. Die GitHub-Veröffentlichung führt vor jedem Upload die automatisierten Tests und Syntaxprüfungen aus.

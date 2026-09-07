@@ -14,6 +14,9 @@ test('Lokale API speichert, schützt Schreibzugriffe und übersteht Neustarts',a
  try{
   await start();
   assert.equal((await fetch(url)).status,200);
+  for(const module of ['app.js','core.mjs','price-list-image.mjs','browser-storage.mjs']) {
+   const response=await fetch(`${url}/${module}`);assert.equal(response.status,200,module);assert.match(response.headers.get('content-type'),/javascript/);
+  }
   const {state,token}=await(await fetch(url+'/api/state')).json();
   state.products[0].ek=14.5;
   const save=(data,t=token)=>fetch(url+'/api/state',{method:'PUT',headers:{'Content-Type':'application/json','X-HP67-Token':t,Origin:url},body:JSON.stringify(data)});

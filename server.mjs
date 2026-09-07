@@ -42,7 +42,7 @@ const server = http.createServer(async (req, res) => {
       } finally { busy = false; }
     }
     if (req.method !== 'GET') return send(405, { error: 'Methode nicht unterstützt.' });
-    const files = { '/': ['public/index.html', 'text/html; charset=utf-8'], '/app.js': ['public/app.js', 'text/javascript; charset=utf-8'], '/style.css': ['public/style.css', 'text/css; charset=utf-8'], '/core.mjs': ['local/core.mjs', 'text/javascript; charset=utf-8'] };
+    const files = { '/': ['public/index.html', 'text/html; charset=utf-8'], '/app.js': ['public/app.js', 'text/javascript; charset=utf-8'], '/style.css': ['public/style.css', 'text/css; charset=utf-8'], '/core.mjs': ['local/core.mjs', 'text/javascript; charset=utf-8'], '/browser-storage.mjs': ['local/browser-storage.mjs', 'text/javascript; charset=utf-8'], '/price-list-image.mjs': ['local/price-list-image.mjs', 'text/javascript; charset=utf-8'] };
     if (!files[url.pathname]) return send(404, { error: 'Nicht gefunden.' });
     const [file, type] = files[url.pathname]; return send(200, await readFile(path.join(root, file), 'utf8'), type);
   } catch (error) { send(400, { error: error.message || 'Speichern fehlgeschlagen.' }); }
