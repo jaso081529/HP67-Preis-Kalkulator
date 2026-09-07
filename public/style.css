@@ -15,3 +15,5 @@
 
 /* A normal document flow is required for multipage printing of modal previews. */
 #print-output{display:none}@media print{body.printing dialog.print-dialog{display:none!important}body.printing #print-output{display:block;width:auto;height:auto;overflow:visible}#print-output .document{padding:0;border:0;max-width:none}#print-output .table-wrap{overflow:visible}}
+
+.invoice-actions{display:flex;flex-wrap:wrap;gap:8px;min-width:100px}@media screen and (max-width:760px){.invoice-table thead{display:none}.invoice-table table,.invoice-table tbody,.invoice-table tr,.invoice-table td{display:block;width:100%}.invoice-table tr{padding:12px 0;border-bottom:1px solid var(--line)}.invoice-table tr:last-child{border:0}.invoice-table td{padding:6px 0;border:0;white-space:normal;overflow-wrap:anywhere;text-align:left}.invoice-table td::before{content:attr(data-label);display:block;color:var(--muted);font-size:11px;margin-bottom:4px}.invoice-table .invoice-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.invoice-table .invoice-actions .button{min-width:0;min-height:44px;padding:8px 4px;font-size:12px}}

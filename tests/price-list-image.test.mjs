@@ -24,6 +24,11 @@ test('Ungeklärte Textilpreise bleiben im PNG sichtbar und lange Texte erhalten'
  const lines=canvasTextLines({measureText:t=>({width:t.length*10})},text,80);
  assert.equal(lines.join(''),text);assert.ok(lines.every(line=>line.length<=8));
 });
+test('Separate Textilien-PNG enthält ausschließlich Textilien und Motivaufpreise',()=>{
+ const sections=priceListImageSections({textilePriceList,stickerPriceList},'textiles');
+ assert.equal(sections.length,textilePriceList.entries.length+1);
+ assert.ok(sections.every(section=>section.kind==='Textilien'));
+});
 
 test('Textilien, Aufkleber und beide Listen können als PNG gespeichert werden',()=>{
  assert.match(app,/function downloadPriceListImage\(mode\)/);

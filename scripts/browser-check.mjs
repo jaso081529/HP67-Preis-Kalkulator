@@ -62,6 +62,7 @@ try{
  const printable=await readFile(html,'utf8');assert.match(printable,/3,50/);assert.match(printable,/4,50/);assert.match(printable,/<style>/);assert.doesNotMatch(printable,/href=".*style.css/);
  await page.locator('[data-action="close"]').click();
  await nav('stickers');await download('[data-action="price-list-image"][data-id="stickers"]','stickers.png');
+ await download('[data-action="price-list-image"][data-id="textiles"]','textiles-from-stickers.png');
  console.log(`${engine}: textile, sticker, combined PNG and standalone print exports pass`);
  await nav('settings');
  for(const [name,value] of Object.entries({business:'QA Firma',address:'Teststraße 1',taxNumber:'TEST-123',hourlyRate:'30',taxRate:'19'}))await page.locator(`#settings-form [name="${name}"]`).fill(value);
@@ -104,6 +105,26 @@ try{
  await download('[data-action="previous-backup"]','before-import.json');
  const publicFile=await download('[data-action="public-export"]','public.json');const publicJson=await readFile(publicFile,'utf8');assert.ok(!publicJson.includes('QA Kunde'));assert.ok(!publicJson.includes('TEST-123'));
  await page.reload();assert.equal((await snapshot()).settings.business,'QA Import');
+ // Manage both invoice types directly from the overview, including on narrow phones.
+ await nav('invoices');await page.setViewportSize({width:320,height:900});
+ const invoiceIds=(await snapshot()).invoices.map(i=>i.id);
+ for(const id of invoiceIds){
+  const row=page.locator('.invoice-table tr').filter({has:page.locator(`[data-action="edit-invoice"][data-id="${id}"]`)});
+  for(const action of ['view-invoice','edit-invoice','delete-invoice']){
+   const bounds=await row.locator(`[data-action="${action}"]`).boundingBox();assert.ok(bounds.x>=0&&bounds.x+bounds.width<=321);
+  }
+  await row.locator('[data-action="edit-invoice"]').click();await field('note').fill('Bearbeitung gespeichert');await field('item-price').first().fill('12.50');await save();
+  const edited=(await snapshot()).invoices.find(i=>i.id===id);assert.equal(edited.note,'Bearbeitung gespeichert');assert.equal(edited.items[0].price,12.5);
+  assert.equal((await snapshot()).invoices.length,invoiceIds.length);
+  await nav('invoices');
+ }
+ const first=invoiceIds[0];page.once('dialog',dialog=>dialog.dismiss());await page.locator(`[data-action="delete-invoice"][data-id="${first}"]`).click();assert.equal((await snapshot()).invoices.length,invoiceIds.length);
+ page.once('dialog',dialog=>{assert.ok(dialog.message().includes((before.invoices.find(i=>i.id===first)).number));return dialog.accept();});
+ await page.locator(`[data-action="delete-invoice"][data-id="${first}"]`).click();await page.waitForFunction(id=>!JSON.parse(localStorage.getItem('hoodplaka67-private-state-v1')).invoices.some(i=>i.id===id),first);
+ await page.reload();await nav('invoices');assert.equal((await snapshot()).invoices.length,invoiceIds.length-1);
+ await page.locator('[data-action="view-invoice"]').click();page.once('dialog',dialog=>dialog.accept());await page.locator('#content [data-action="delete-invoice"]').click();await page.waitForFunction(()=>JSON.parse(localStorage.getItem('hoodplaka67-private-state-v1')).invoices.length===0);
+ assert.match(await page.locator('#content').innerText(),/Noch keine Rechnungen/);
+ console.log(`${engine}: editing both invoice types, mobile action buttons, cancelling deletion and permanent deletion pass`);
  assert.deepEqual(errors,[]);
  console.log(`${engine}: stale tab protection, import backup, public privacy and reload persistence pass; no JavaScript errors`);
  await context.close();
