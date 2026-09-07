@@ -1,5 +1,5 @@
 import { categories, calculate, quoteTotals, invoiceTotals, validateState, publicCatalog, round, plannerSuggestions, listPriceNet, syncTextilePrices } from './core.mjs';
-import { priceListImageSections, canvasTextLines, priceTypeLabels } from './price-list-image.mjs';
+import { priceListImageSections, canvasTextLines, priceTypeLabels, pricePage, priceListPages, priceListSvg, zipPriceImages } from './price-list-image.mjs';
 import { browserStorageKey, browserBackupKey, saveBrowserState } from './browser-storage.mjs';
 const $ = (s, root = document) => root.querySelector(s);
 const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -27,41 +27,39 @@ function openPrintView(title = 'HooDPlaka67 Druckansicht') {
  dialog.showModal();
 }
 function downloadPrintFile(){if(!printPayload)throw Error('Keine Druckansicht vorbereitet.');const blob=new Blob([printPayload.html],{type:'text/html;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`${printPayload.title.replace(/[^a-z0-9_-]/gi,'-')}.html`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);toast('Druckdatei gespeichert. Öffne sie im Browser und wähle Drucken oder Als PDF speichern.');}
+let priceExport=null;
 function downloadPriceListImage(mode){
  const sections=priceListImageSections(state,mode);if(!sections.length)throw Error('Für diese Preisliste sind keine Daten vorhanden.');
- const width=1200,padding=55,contentWidth=width-padding*2;
- const canvas=document.createElement('canvas'),ctx=canvas.getContext('2d');
- if(!ctx)throw Error('Dieser Browser kann kein PNG erstellen. Bitte Drucken / PDF verwenden.');
- const layouts=sections.map(section=>{
-  const columnWidths=section.headers.length===2?[contentWidth*.7,contentWidth*.3]:[230,...section.headers.slice(1).map(()=> (contentWidth-230)/(section.headers.length-1))];
-  ctx.font='800 24px Segoe UI,Arial';const title=canvasTextLines(ctx,section.title,contentWidth-32);
-  ctx.font='16px Segoe UI,Arial';const note=canvasTextLines(ctx,section.note,contentWidth-32);
-  const rows=[section.headers,...section.rows].map((row,index)=>{
-   ctx.font=index?'16px Segoe UI,Arial':'700 14px Segoe UI,Arial';
-   const cells=row.map((cell,i)=>canvasTextLines(ctx,cell,columnWidths[i]-26));
-   return {cells,height:Math.max(46,Math.max(...cells.map(lines=>lines.length))*23+20)};
-  });
-  return {section,columnWidths,title,note,rows,height:24+title.length*31+note.length*23+20+rows.reduce((sum,row)=>sum+row.height,0)};
- });
- const height=170+layouts.reduce((sum,layout)=>sum+layout.height+26,0)+60;
- if(width*height>16000000)throw Error('Die Preisliste ist für eine einzelne PNG-Datei zu groß. Bitte die Listen getrennt oder als PDF speichern.');
- canvas.width=width;canvas.height=height;ctx.fillStyle='#f3f5f6';ctx.fillRect(0,0,width,height);ctx.fillStyle='#17242b';ctx.fillRect(0,0,width,18);
- ctx.font='900 42px Segoe UI,Arial';ctx.fillText('HooDPlaka67',padding,72);ctx.font='700 18px Segoe UI,Arial';ctx.fillStyle='#60717a';
- ctx.fillText(mode==='both'?'KOMPLETTE PREISLISTE':mode==='textiles'?'TEXTILIEN-PREISLISTE':'AUFKLEBER-PREISLISTE',padding,106);
- ctx.textAlign='right';ctx.font='16px Segoe UI,Arial';ctx.fillText(new Date().toLocaleDateString('de-DE'),width-padding,72);ctx.textAlign='left';let y=170;
- for(const layout of layouts){
-  ctx.fillStyle='#fff';ctx.fillRect(padding,y,contentWidth,layout.height);ctx.fillStyle='#17242b';ctx.font='800 24px Segoe UI,Arial';y+=35;
-  for(const line of layout.title){ctx.fillText(line,padding+16,y);y+=31;}
-  ctx.font='16px Segoe UI,Arial';ctx.fillStyle='#60717a';
-  for(const line of layout.note){ctx.fillText(line,padding+16,y);y+=23;}y+=9;
-  layout.rows.forEach((row,index)=>{
-   ctx.fillStyle=index?'#fff':'#e9eef0';ctx.fillRect(padding,y,contentWidth,row.height);ctx.fillStyle='#17242b';ctx.font=index?'16px Segoe UI,Arial':'700 14px Segoe UI,Arial';let x=padding;
-   row.cells.forEach((lines,i)=>{ctx.textAlign=i?'right':'left';const tx=i?x+layout.columnWidths[i]-13:x+13;lines.forEach((line,j)=>ctx.fillText(line,tx,y+29+j*23));x+=layout.columnWidths[i];});
-   y+=row.height;ctx.strokeStyle='#dde4e7';ctx.beginPath();ctx.moveTo(padding,y);ctx.lineTo(width-padding,y);ctx.stroke();
-  });ctx.textAlign='left';y+=26;
- }
- ctx.fillStyle='#60717a';ctx.font='14px Segoe UI,Arial';ctx.fillText('Preisart und Mengeneinheit stehen bei jedem Abschnitt.',padding,height-25);
- canvas.toBlob(blob=>{if(!blob){toast('PNG konnte nicht erstellt werden. Bitte Drucken / PDF verwenden.');return;}const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=['HooDPlaka67',mode==='both'?'Komplette-Preisliste':mode==='textiles'?'Textilien-Preisliste':'Aufkleber-Preisliste',date()].join('-')+'.png';a.click();setTimeout(()=>URL.revokeObjectURL(url),10000);toast('Preisliste als PNG gespeichert.');},'image/png');
+ const ctx=document.createElement('canvas').getContext('2d');if(!ctx)throw Error('Dieser Browser kann keine Bilder erstellen. Bitte Drucken / PDF verwenden.');
+ const pages=priceListPages(ctx,sections),title=mode==='both'?'Komplette Preisliste':mode==='textiles'?'Textilien-Preisliste':'Aufkleber-Preisliste';
+ priceExport={pages,title,stamp:new Date().toLocaleDateString('de-DE'),filename:'HooDPlaka67-'+title.replaceAll(' ','-')+'-'+date()};
+ dialog.className='price-export-dialog';
+ dialog.innerHTML='<div class="dialog-head"><h2>'+esc(title)+' herunterladen</h2><button class="close" type="button" data-action="close" aria-label="Schließen">×</button></div>'+
+ '<p>Hochauflösende PNG-Seiten mit <strong>2.400 × 3.394 Pixeln</strong>. Die Schrift ist größer; die Liste wird auf '+pages.length+' Seiten verteilt.</p>'+
+ '<div class="actions"><button class="button primary" type="button" data-action="price-list-zip">Alle PNG-Seiten als ZIP</button><button class="button" type="button" data-action="price-list-svg">SVG · scharf bei jedem Zoom</button></div>'+
+ '<p class="helper">PNG-Seiten kannst du einzeln als Bilder versenden. Die SVG-Datei enthält die gesamte ausgewählte Liste und bleibt beim Vergrößern scharf.</p><p id="price-export-status" role="status" aria-live="polite"></p>'+
+ '<div class="price-export-pages">'+pages.map((page,index)=>'<div class="price-export-page"><strong>Seite '+(index+1)+'</strong><span>'+esc(page[0].title.join(' '))+(page.length>1?' – '+esc(page.at(-1).title.join(' ')):'')+'</span><button class="button" type="button" data-action="price-list-page" data-id="'+index+'">Seite '+(index+1)+' als PNG</button></div>').join('')+'</div>';
+ dialog.showModal();
+}
+function saveExportBlob(blob,filename){const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=filename;a.click();setTimeout(()=>URL.revokeObjectURL(url),60000);}
+async function pricePagePng(payload,index){
+ const svg=priceListSvg(payload.pages,payload.title,payload.stamp,index),img=new Image();
+ img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);await img.decode();
+ const canvas=document.createElement('canvas');canvas.width=pricePage.width*pricePage.scale;canvas.height=pricePage.height*pricePage.scale;
+ const ctx=canvas.getContext('2d');if(!ctx)throw Error('PNG konnte nicht erstellt werden. Bitte die SVG-Datei verwenden.');
+ ctx.drawImage(img,0,0,canvas.width,canvas.height);
+ return new Promise((resolve,reject)=>canvas.toBlob(blob=>{canvas.width=0;canvas.height=0;if(blob)resolve(blob);else reject(Error('PNG konnte nicht erstellt werden. Bitte die SVG-Datei verwenden.'));},'image/png'));
+}
+async function savePriceExport(action,id,target){
+ const payload=priceExport;if(!payload)throw Error('Bitte die Preisliste erneut öffnen.');
+ const status=$('#price-export-status'),controls=[...dialog.querySelectorAll('button[data-action^="price-list-"]')];controls.forEach(button=>button.disabled=true);
+ const name=index=>payload.filename+'-Seite-'+String(index+1).padStart(2,'0')+'.png';
+ try{
+  if(action==='price-list-svg'){saveExportBlob(new Blob([priceListSvg(payload.pages,payload.title,payload.stamp)],{type:'image/svg+xml;charset=utf-8'}),payload.filename+'.svg');}
+  else if(action==='price-list-page'){status.textContent='PNG wird erstellt …';const index=Number(id);saveExportBlob(await pricePagePng(payload,index),name(index));}
+  else {const files=[];for(let index=0;index<payload.pages.length;index++){status.textContent='PNG-Seite '+(index+1)+' von '+payload.pages.length+' wird erstellt …';files.push({name:name(index),blob:await pricePagePng(payload,index)});}saveExportBlob(await zipPriceImages(files),payload.filename+'-PNG-HD.zip');}
+  status.textContent='Download erstellt.';toast('Preisliste in hoher Qualität gespeichert.');
+ }finally{controls.forEach(button=>button.disabled=false);}
 }
 async function persist(next, options = {}) {
  syncTextilePrices(next);
@@ -256,6 +254,7 @@ document.addEventListener('click',async e=>{const nav=e.target.closest('[data-na
  else if(action==='confirm-print'){document.body.classList.add('printing');window.addEventListener('afterprint',()=>document.body.classList.remove('printing'),{once:true});window.print();}
  else if(action==='download-print')downloadPrintFile();
  else if(action==='price-list-image')downloadPriceListImage(id);
+ else if(['price-list-page','price-list-zip','price-list-svg'].includes(action))await savePriceExport(action,id,target);
  else if(action==='invoice-image'){const invoice=(state.invoices||[]).find(i=>i.id===id);if(!invoice||invoice.type!=='Einfach')throw Error('Einfache interne Rechnung nicht gefunden.');downloadSimpleInvoiceImage(invoice);}
  else if(action==='add-item')$('#quote-items').insertAdjacentHTML('beforeend',quoteRow());
  else if(action==='add-invoice-item')$('#invoice-items').insertAdjacentHTML('beforeend',quoteRow());

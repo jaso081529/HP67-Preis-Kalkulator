@@ -29,7 +29,7 @@ try{
  const field=name=>page.locator(`#modal-form [name="${name}"]`);
  const save=async()=>{await page.locator('#modal-form button[type=submit]').click();await page.locator('#dialog').waitFor({state:'hidden'});};
  const snapshot=()=>page.evaluate(()=>JSON.parse(localStorage.getItem('hoodplaka67-private-state-v1')));
- const download=async(selector,name)=>{const event=page.waitForEvent('download');await page.locator(selector).click();const result=await event;const path=new URL(`${engine}-${name}`,output);await result.saveAs(fileURLToPath(path));return path;};
+ const download=async(selector,name)=>{const priceList=selector.includes('data-action="price-list-image"');if(priceList){await page.locator(selector).click();selector='[data-action="price-list-page"][data-id="0"]';}const event=page.waitForEvent('download',{timeout:60000});await page.locator(selector).click();const result=await event;const path=new URL(`${engine}-${name}`,output);await result.saveAs(fileURLToPath(path));if(priceList)await page.locator('[data-action="close"]').click();return path;};
  await page.goto(url);await page.locator('[data-nav="overview"]').waitFor();
  for(const width of [1440,390,320]){
   await page.setViewportSize({width,height:900});
@@ -47,8 +47,15 @@ try{
  await nav('textiles');
  for(const mode of ['textiles','both']){
   const file=await download(`[data-action="price-list-image"][data-id="${mode}"]`,`${mode}.png`);
-  const bytes=await readFile(file);assert.equal(bytes.subarray(1,4).toString(),'PNG');assert.ok(bytes.readUInt32BE(20)>1000);
+  const bytes=await readFile(file);assert.equal(bytes.subarray(1,4).toString(),'PNG');assert.equal(bytes.readUInt32BE(16),2400);assert.equal(bytes.readUInt32BE(20),3394);
  }
+ await page.locator('[data-action="price-list-image"][data-id="both"]').click();
+ const pageCount=await page.locator('[data-action="price-list-page"]').count();assert.ok(pageCount>1);
+ const svgFile=await download('[data-action="price-list-svg"]','prices.svg');const svg=await readFile(svgFile,'utf8');assert.match(svg,/<text /);assert.match(svg,/Zusätzliche Motive/);assert.match(svg,/Aufkleber|A3/);
+ const zipFile=await download('[data-action="price-list-zip"]','prices-hd.zip');const zip=await readFile(zipFile);let offset=0,entries=0;
+ while(zip.readUInt32LE(offset)===0x04034b50){const size=zip.readUInt32LE(offset+18),nameLength=zip.readUInt16LE(offset+26),extraLength=zip.readUInt16LE(offset+28),start=offset+30+nameLength+extraLength;assert.equal(zip.subarray(start+1,start+4).toString(),'PNG');assert.equal(zip.readUInt32BE(start+16),2400);assert.equal(zip.readUInt32BE(start+20),3394);offset=start+size;entries++;}
+ assert.equal(entries,pageCount);
+ await page.locator('[data-action="close"]').click();
  await page.locator('[data-action="print"]').click();
  await page.evaluate(()=>{window.print=()=>{};});
  await page.locator('[data-action="confirm-print"]').click();

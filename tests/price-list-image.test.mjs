@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
-import {priceListImageSections,canvasTextLines} from '../local/price-list-image.mjs';
+import {priceListImageSections,canvasTextLines,priceListPages,priceListSvg,pricePage,zipPriceImages} from '../local/price-list-image.mjs';
 import {stickerPriceList} from '../local/sticker-prices.mjs';
 
 const app=await readFile(new URL('../public/app.js',import.meta.url),'utf8');
@@ -28,6 +28,30 @@ test('Separate Textilien-PNG enthält ausschließlich Textilien und Motivaufprei
  const sections=priceListImageSections({textilePriceList,stickerPriceList},'textiles');
  assert.equal(sections.length,textilePriceList.entries.length+1);
  assert.ok(sections.every(section=>section.kind==='Textilien'));
+});
+test('HD-Seiten behalten alle Preise und überschreiten die Bildgrenzen nicht',()=>{
+ const sections=priceListImageSections({textilePriceList,stickerPriceList},'both');
+ const pages=priceListPages({measureText:text=>({width:text.length*11})},sections);
+ assert.ok(pages.length>1);assert.equal(pricePage.width*pricePage.scale,2400);
+ assert.ok(pricePage.width*pricePage.height*pricePage.scale**2<16000000);
+ const rows=pages.flatMap(page=>page.flatMap(block=>{assert.ok(block.y+block.height<=pricePage.bottom);return block.rows.slice(1).map(row=>row.cells.map(cell=>cell.join('')));}));
+ assert.deepEqual(rows,sections.flatMap(section=>section.rows));
+ const svg=priceListSvg(pages,'Test <Preise>','07.09.2026');
+ assert.match(svg,/Test &lt;Preise&gt;/);assert.match(svg,/<text /);assert.doesNotMatch(svg,/<image|<script/);
+});
+test('Zu lange Tabellen werden auf Seiten mit wiederholten Spaltenüberschriften verteilt',()=>{
+ const rows=Array.from({length:100},(_,i)=>['Artikel '+i,String(i)]);
+ const pages=priceListPages({measureText:text=>({width:text.length*10})},[{title:'Lange Liste',kind:'Textilien',note:'Netto',headers:['Name','Preis'],rows}]);
+ assert.ok(pages.length>1);
+ assert.deepEqual(pages.flatMap(page=>page.flatMap(block=>block.rows.slice(1).map(row=>row.cells.map(cell=>cell.join(''))))),rows);
+ for(const page of pages)assert.deepEqual(page[0].rows[0].cells,[['Name'],['Preis']]);
+});
+test('ZIP enthält vollständige Dateien mit Standard-CRC und Verzeichnis',async()=>{
+ const blob=await zipPriceImages([{name:'seite.png',blob:new Blob(['123456789'])}]);
+ const bytes=new Uint8Array(await blob.arrayBuffer()),view=new DataView(bytes.buffer);
+ assert.equal(view.getUint32(0,true),0x04034b50);assert.equal(view.getUint32(14,true),0xcbf43926);
+ assert.equal(view.getUint32(18,true),9);assert.equal(new TextDecoder().decode(bytes.slice(39,48)),'123456789');
+ assert.equal(view.getUint32(bytes.length-22,true),0x06054b50);assert.equal(view.getUint16(bytes.length-12,true),1);
 });
 
 test('Textilien, Aufkleber und beide Listen können als PNG gespeichert werden',()=>{
